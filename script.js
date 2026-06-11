@@ -133,20 +133,17 @@ function getFormData(){
 
 function getPositions(){
   const lw=labelSize.w, lh=labelSize.h, GAP=2;
-  if(layoutMode==='1full') return {cells:[{x:0,y:0}], fit:true};
-  if(layoutMode==='2horiz') return {cells:[{x:0,y:0},{x:lw+GAP,y:0}], fit:(lw*2+GAP <= 210 && lh <= 297)};
-  if(layoutMode==='2vert') return {cells:[{x:0,y:0},{x:0,y:lh+GAP}], fit:(lw <= 210 && lh*2+GAP <= 297)};
-  if(layoutMode==='4grid') return {cells:[{x:0,y:0},{x:lw+GAP,y:0},{x:0,y:lh+GAP},{x:lw+GAP,y:lh+GAP}], fit:(lw*2+GAP <= 210 && lh*2+GAP <= 297)};
+  if(layoutMode==='1full') return {sheetW:lw,sheetH:lh,cells:[{x:0,y:0}]};
+  if(layoutMode==='2horiz') return {sheetW:lw*2+GAP,sheetH:lh,cells:[{x:0,y:0},{x:lw+GAP,y:0}]};
+  if(layoutMode==='2vert') return {sheetW:lw,sheetH:lh*2+GAP,cells:[{x:0,y:0},{x:0,y:lh+GAP}]};
+  if(layoutMode==='4grid') return {sheetW:lw*2+GAP,sheetH:lh*2+GAP,cells:[{x:0,y:0},{x:lw+GAP,y:0},{x:0,y:lh+GAP},{x:lw+GAP,y:lh+GAP}]};
   if(layoutMode==='custom'){
     const posMap={tl:{x:0,y:0},tr:{x:lw+GAP,y:0},bl:{x:0,y:lh+GAP},br:{x:lw+GAP,y:lh+GAP}};
     const cells=Object.entries(customPositions).filter(([,v])=>v).map(([k])=>posMap[k]);
-    const maxX=Math.max(...cells.map(c=>c.x),0);
-    const maxY=Math.max(...cells.map(c=>c.y),0);
-    const totalW = maxX + lw;
-    const totalH = maxY + lh;
-    return {cells, fit:(totalW <= 210 && totalH <= 297)};
+    const maxX=Math.max(...cells.map(c=>c.x),0), maxY=Math.max(...cells.map(c=>c.y),0);
+    return {sheetW:maxX>0?lw*2+GAP:lw, sheetH:maxY>0?lh*2+GAP:lh, cells};
   }
-  return {cells:[{x:0,y:0}], fit:true};
+  return {sheetW:lw,sheetH:lh,cells:[{x:0,y:0}]};
 }
 
 function renderPreview(){
@@ -154,95 +151,107 @@ function renderPreview(){
   const PX=2.83;
   data.w=Math.round(labelSize.w*PX); data.h=Math.round(labelSize.h*PX);
   const pos=getPositions();
-  const cells=pos.cells;
-  const maxX=Math.max(...cells.map(c=>c.x),0);
-  const maxY=Math.max(...cells.map(c=>c.y),0);
-  const totalW=Math.round((maxX+labelSize.w)*PX);
-  const totalH=Math.round((maxY+labelSize.h)*PX);
+  const totalW=Math.round(pos.sheetW*PX), totalH=Math.round(pos.sheetH*PX);
   let inner='';
-  cells.forEach(c=>{ inner+=`<div style="position:absolute;left:${Math.round(c.x*PX)}px;top:${Math.round(c.y*PX)}px;">${getLabelHtml(data,PX)}</div>`; });
+  pos.cells.forEach(c=>{ inner+=`<div style="position:absolute;left:${Math.round(c.x*PX)}px;top:${Math.round(c.y*PX)}px;">${getLabelHtml(data,PX)}</div>`; });
   const p=document.getElementById('labelPreview');
   p.style.width=totalW+'px'; p.style.height=totalH+'px'; p.style.position='relative'; p.style.background='#d1d5db'; p.style.borderRadius='4px'; p.style.boxShadow='0 16px 50px rgba(0,0,0,.7)'; p.innerHTML=inner;
 }
 
-function printLabel(){
+// -------------------- НОВА ВЕРСІЯ ДРУКУ (A4, автоматичне масштабування) --------------------
+function printLabel() {
   const data = getFormData();
-  const positions = getPositions();
-  const cells = positions.cells;
-  
-  // Перевірка, чи вміщається на А4
-  if (!positions.fit) {
-    if (!confirm("Обране розміщення не вміщається на аркуш А4. Друкувати все одно? (Частина етикеток може бути обрізана)")) {
-      return;
+  const positions = getPositions();          // отримуємо макет в мм (без масштабу)
+  const labelMM = { w: labelSize.w, h: labelSize.h };
+  const A4_W = 210, A4_H = 297;
+  const margin = 10; // мм з кожного боку
+
+  // Обчислюємо необхідну ширину та висоту для розміщення всіх етикеток з проміжками
+  let requiredW = positions.sheetW;
+  let requiredH = positions.sheetH;
+
+  // Якщо макет вміщається на A4 з полями – друкуємо без змін
+  let scale = 1;
+  if (requiredW > (A4_W - 2*margin) || requiredH > (A4_H - 2*margin)) {
+    // Обчислюємо необхідне масштабування, щоб влізло в A4 з полями
+    const scaleW = (A4_W - 2*margin) / requiredW;
+    const scaleH = (A4_H - 2*margin) / requiredH;
+    scale = Math.min(scaleW, scaleH);
+    if (scale < 0.5) {
+      alert(`Увага! Обраний макет занадто великий для аркуша A4. Буде застосовано масштаб ${Math.round(scale*100)}%. Рекомендуємо вибрати менший розмір етикетки або інший макет.`);
+    } else {
+      alert(`Обраний макет трохи більший за A4. Буде застосовано автоматичне масштабування ${Math.round(scale*100)}% для вміщення на аркуш.`);
     }
   }
-  
-  const pxPerMm = 3.7795;
+
+  // Функція для генерації однієї етикетки з можливим масштабуванням (для друку)
+  function getScaledLabelHtml(d, scaleFactor) {
+    const PX_BASE = 3.7795; // 1 мм = 3.7795 px (96 dpi)
+    const wPx = Math.round(labelMM.w * PX_BASE * scaleFactor);
+    const hPx = Math.round(labelMM.h * PX_BASE * scaleFactor);
+    const tempData = { ...d, w: wPx, h: hPx };
+    // Тимчасово змінюємо px для генерації HTML з правильним розміром
+    const originalW = d.w, originalH = d.h;
+    d.w = wPx; d.h = hPx;
+    const html = getLabelHtml(d, PX_BASE);
+    d.w = originalW; d.h = originalH;
+    return html;
+  }
+
+  // Розраховуємо положення кожної етикетки в міліметрах після масштабування
+  const cellsScaled = positions.cells.map(cell => ({
+    x: margin + cell.x * scale,
+    y: margin + cell.y * scale,
+    w: labelMM.w * scale,
+    h: labelMM.h * scale
+  }));
+
+  // Генеруємо HTML для друку (A4, абсолютне позиціонування в мм)
+  const style = `
+    @page { size: A4; margin: 0; }
+    body { margin: 0; padding: 0; background: white; width: 210mm; height: 297mm; overflow: hidden; position: relative; }
+    .label { position: absolute; background: white; overflow: hidden; }
+    @media print {
+      body { margin: 0; padding: 0; }
+      .no-print { display: none; }
+    }
+  `;
   let labelsHtml = '';
-  cells.forEach(cell => {
-    const labelW_mm = labelSize.w;
-    const labelH_mm = labelSize.h;
-    const x_mm = cell.x;
-    const y_mm = cell.y;
-    const labelW_px = Math.round(labelW_mm * pxPerMm);
-    const labelH_px = Math.round(labelH_mm * pxPerMm);
-    data.w = labelW_px;
-    data.h = labelH_px;
-    const labelHtml = getLabelHtml(data, pxPerMm, true);
-    labelsHtml += `<div style="position:absolute; left:${x_mm}mm; top:${y_mm}mm; width:${labelW_mm}mm; height:${labelH_mm}mm;">${labelHtml}</div>`;
-  });
-  
+  for (let i = 0; i < cellsScaled.length; i++) {
+    const c = cellsScaled[i];
+    const leftMm = c.x;
+    const topMm = c.y;
+    const widthMm = c.w;
+    const heightMm = c.h;
+    // Генеруємо HTML конкретної етикетки з масштабом
+    const labelHtml = getScaledLabelHtml(data, scale);
+    labelsHtml += `<div class="label" style="left: ${leftMm}mm; top: ${topMm}mm; width: ${widthMm}mm; height: ${heightMm}mm;">${labelHtml}</div>`;
+  }
+
   const html = `<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<title>Label — ${esc(data.name||selectedSeries)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { margin:0; padding:0; background:white; }
-  @page { size: A4; margin: 0; }
-  @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .no-print { display: none !important; }
-  }
-  .sheet {
-    position: relative;
-    width: 210mm;
-    height: 297mm;
-    background: white;
-    overflow: hidden; /* обрізати те, що виходить за межі */
-  }
-  .no-print {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: #e63946;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    z-index: 1000;
-    font-family: 'Inter', sans-serif;
-  }
-</style>
-</head><body>
-<button class="no-print" onclick="window.close()">${t('close_btn')}</button>
-<div class="sheet">${labelsHtml}</div>
-<script>
-  document.fonts.ready.then(() => { setTimeout(() => window.print(), 350); });
-<\/script>
-</body></html>`;
-  
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Друк етикеток SICO</title>
+    <style>${style}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <button class="no-print" onclick="window.close()" style="position:fixed;bottom:10px;right:10px;z-index:1000;background:#e63946;color:white;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;">${t('close_btn')}</button>
+    ${labelsHtml}
+    <script>
+      document.fonts.ready.then(() => { setTimeout(() => window.print(), 300); });
+    <\/script>
+  </body>
+  </html>`;
+
   const win = window.open('', '_blank');
   if (!win) { alert('Дозвольте спливаючі вікна в браузері'); return; }
   win.document.write(html);
   win.document.close();
-  win.focus();
   showToast(t('toast_print'));
 }
+// ------------------------------------------------------------------
 
 function copyHtml(){ navigator.clipboard.writeText(document.getElementById('labelPreview').outerHTML).then(()=>showToast(t('toast_copy'))); }
 function resetForm(){
