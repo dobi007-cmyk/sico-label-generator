@@ -133,17 +133,20 @@ function getFormData(){
 
 function getPositions(){
   const lw=labelSize.w, lh=labelSize.h, GAP=2;
-  if(layoutMode==='1full') return {sheetW:lw,sheetH:lh,cells:[{x:0,y:0}]};
-  if(layoutMode==='2horiz') return {sheetW:lw*2+GAP,sheetH:lh,cells:[{x:0,y:0},{x:lw+GAP,y:0}]};
-  if(layoutMode==='2vert') return {sheetW:lw,sheetH:lh*2+GAP,cells:[{x:0,y:0},{x:0,y:lh+GAP}]};
-  if(layoutMode==='4grid') return {sheetW:lw*2+GAP,sheetH:lh*2+GAP,cells:[{x:0,y:0},{x:lw+GAP,y:0},{x:0,y:lh+GAP},{x:lw+GAP,y:lh+GAP}]};
+  if(layoutMode==='1full') return {cells:[{x:0,y:0}], fit:true};
+  if(layoutMode==='2horiz') return {cells:[{x:0,y:0},{x:lw+GAP,y:0}], fit:(lw*2+GAP <= 210 && lh <= 297)};
+  if(layoutMode==='2vert') return {cells:[{x:0,y:0},{x:0,y:lh+GAP}], fit:(lw <= 210 && lh*2+GAP <= 297)};
+  if(layoutMode==='4grid') return {cells:[{x:0,y:0},{x:lw+GAP,y:0},{x:0,y:lh+GAP},{x:lw+GAP,y:lh+GAP}], fit:(lw*2+GAP <= 210 && lh*2+GAP <= 297)};
   if(layoutMode==='custom'){
     const posMap={tl:{x:0,y:0},tr:{x:lw+GAP,y:0},bl:{x:0,y:lh+GAP},br:{x:lw+GAP,y:lh+GAP}};
     const cells=Object.entries(customPositions).filter(([,v])=>v).map(([k])=>posMap[k]);
-    const maxX=Math.max(...cells.map(c=>c.x),0), maxY=Math.max(...cells.map(c=>c.y),0);
-    return {sheetW:maxX>0?lw*2+GAP:lw, sheetH:maxY>0?lh*2+GAP:lh, cells};
+    const maxX=Math.max(...cells.map(c=>c.x),0);
+    const maxY=Math.max(...cells.map(c=>c.y),0);
+    const totalW = maxX + lw;
+    const totalH = maxY + lh;
+    return {cells, fit:(totalW <= 210 && totalH <= 297)};
   }
-  return {sheetW:lw,sheetH:lh,cells:[{x:0,y:0}]};
+  return {cells:[{x:0,y:0}], fit:true};
 }
 
 function renderPreview(){
@@ -151,29 +154,96 @@ function renderPreview(){
   const PX=2.83;
   data.w=Math.round(labelSize.w*PX); data.h=Math.round(labelSize.h*PX);
   const pos=getPositions();
-  const totalW=Math.round(pos.sheetW*PX), totalH=Math.round(pos.sheetH*PX);
+  const cells=pos.cells;
+  const maxX=Math.max(...cells.map(c=>c.x),0);
+  const maxY=Math.max(...cells.map(c=>c.y),0);
+  const totalW=Math.round((maxX+labelSize.w)*PX);
+  const totalH=Math.round((maxY+labelSize.h)*PX);
   let inner='';
-  pos.cells.forEach(c=>{ inner+=`<div style="position:absolute;left:${Math.round(c.x*PX)}px;top:${Math.round(c.y*PX)}px;">${getLabelHtml(data,PX)}</div>`; });
+  cells.forEach(c=>{ inner+=`<div style="position:absolute;left:${Math.round(c.x*PX)}px;top:${Math.round(c.y*PX)}px;">${getLabelHtml(data,PX)}</div>`; });
   const p=document.getElementById('labelPreview');
   p.style.width=totalW+'px'; p.style.height=totalH+'px'; p.style.position='relative'; p.style.background='#d1d5db'; p.style.borderRadius='4px'; p.style.boxShadow='0 16px 50px rgba(0,0,0,.7)'; p.innerHTML=inner;
 }
 
 function printLabel(){
-  const data=getFormData();
-  const PX=3.7795;
-  const pos=getPositions();
-  let parts='';
-  pos.cells.forEach(c=>{
-    data.w=Math.round(labelSize.w*PX); data.h=Math.round(labelSize.h*PX);
-    parts+=`<div style="position:absolute;left:${Math.round(c.x*PX)}px;top:${Math.round(c.y*PX)}px;">${getLabelHtml(data,PX)}</div>`;
+  const data = getFormData();
+  const positions = getPositions();
+  const cells = positions.cells;
+  
+  // Перевірка, чи вміщається на А4
+  if (!positions.fit) {
+    if (!confirm("Обране розміщення не вміщається на аркуш А4. Друкувати все одно? (Частина етикеток може бути обрізана)")) {
+      return;
+    }
+  }
+  
+  const pxPerMm = 3.7795;
+  let labelsHtml = '';
+  cells.forEach(cell => {
+    const labelW_mm = labelSize.w;
+    const labelH_mm = labelSize.h;
+    const x_mm = cell.x;
+    const y_mm = cell.y;
+    const labelW_px = Math.round(labelW_mm * pxPerMm);
+    const labelH_px = Math.round(labelH_mm * pxPerMm);
+    data.w = labelW_px;
+    data.h = labelH_px;
+    const labelHtml = getLabelHtml(data, pxPerMm, true);
+    labelsHtml += `<div style="position:absolute; left:${x_mm}mm; top:${y_mm}mm; width:${labelW_mm}mm; height:${labelH_mm}mm;">${labelHtml}</div>`;
   });
-  const pageW=pos.sheetW+'mm', pageH=pos.sheetH+'mm', bodyW=Math.round(pos.sheetW*PX)+'px';
-  const win=window.open('','_blank');
-  if(!win){ alert('Дозвольте спливаючі вікна'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Print Labels</title><style>body{margin:0;padding:0;}@page{size:${pageW} ${pageH};margin:0;}.sheet{position:relative;width:${bodyW};height:${Math.round(pos.sheetH*PX)}px;background:white;}.close-btn{position:fixed;bottom:12px;right:12px;background:#e63946;color:white;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;z-index:9999;}@media print{.close-btn{display:none;}}</style></head><body><button class="close-btn" onclick="window.close()">${t('close_btn')}</button><div class="sheet">${parts}</div><script>setTimeout(()=>window.print(),300);<\/script></body></html>`);
+  
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>Label — ${esc(data.name||selectedSeries)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { margin:0; padding:0; background:white; }
+  @page { size: A4; margin: 0; }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .no-print { display: none !important; }
+  }
+  .sheet {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    background: white;
+    overflow: hidden; /* обрізати те, що виходить за межі */
+  }
+  .no-print {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: #e63946;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+  }
+</style>
+</head><body>
+<button class="no-print" onclick="window.close()">${t('close_btn')}</button>
+<div class="sheet">${labelsHtml}</div>
+<script>
+  document.fonts.ready.then(() => { setTimeout(() => window.print(), 350); });
+<\/script>
+</body></html>`;
+  
+  const win = window.open('', '_blank');
+  if (!win) { alert('Дозвольте спливаючі вікна в браузері'); return; }
+  win.document.write(html);
   win.document.close();
+  win.focus();
   showToast(t('toast_print'));
 }
+
 function copyHtml(){ navigator.clipboard.writeText(document.getElementById('labelPreview').outerHTML).then(()=>showToast(t('toast_copy'))); }
 function resetForm(){
   ['productName','productCategory','productUse','productAspect','productDrying','batchNo','expiryDate'].forEach(id=>{ document.getElementById(id).value=''; });
