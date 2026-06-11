@@ -1,4 +1,66 @@
 const SERIES = {
+  EC:      {name:'EURECO EC',        bg:'#10b981',border:'#fbbf24',ghs:['GHS02','GHS07']},
+  CF:      {name:'CARTOFLEX CF',     bg:'#dc2626',border:'#fcd34d',ghs:['GHS07']},
+  PLUV:    {name:'UVIPLAST PLUV',    bg:'#2563eb',border:'#fbbf24',ghs:['GHS07','GHS08','GHS09']},
+  PLUV_LED:{name:'UVIPLAST PLUV LED',bg:'#2563eb',border:'#fbbf24',ghs:['GHS07','GHS08','GHS09']},
+  SX:      {name:'SICOTEX SX',       bg:'#fbbf24',border:'#000',   ghs:[]},
+  SPTN:    {name:'SICOPLAST SPTN',   bg:'#7e22ce',border:'#fcd34d',ghs:[]},
+  TPP:     {name:'POLYPRO TPP',      bg:'#a78bfa',border:'#fbbf24',ghs:['GHS07','GHS02','GHS08']},
+  AS:      {name:'AQUASET AS',       bg:'#0e7a7a',border:'#fbbf24',ghs:[]},
+  OTF:     {name:'OPATEX OTF',       bg:'#2563eb',border:'#fbbf24',ghs:[]},
+  NST:     {name:'SICONYL NST',      bg:'#1e293b',border:'#fbbf24',ghs:['GHS02']},
+  QS:      {name:'QUICKSET QS',      bg:'#f97316',border:'#fcd34d',ghs:['GHS02']},
+  SN:      {name:'SICONYL SN',       bg:'#6b7280',border:'#fbbf24',ghs:['GHS02']},
+};
+
+const SAFETY = {
+  EC:{
+    uk:{contains:'1-етоксипропан-2-ол',hazards:['H226 - Легкозаймиста рідина і пари','H336 - Може викликати сонливість або запаморочення'],precautions:['P271 - Використовувати тільки у добре вентильованому приміщенні','P312 - При поганому самопочутті звернутися до лікаря','P405 - Зберігати під замком','P501 - Утилізувати на спеціалізованому підприємстві']},
+    en:{contains:'1-ethoxypropan-2-ol',hazards:['H226 - Flammable liquid and vapour','H336 - May cause drowsiness or dizziness'],precautions:['P271 - Use only in well-ventilated area','P312 - Call a doctor if you feel unwell','P405 - Store locked up','P501 - Dispose to authorised facility']},
+    pl:{contains:'1-etoksypropan-2-ol',hazards:['H226 - Łatwopalna ciecz i pary','H336 - Może wywoływać senność lub zawroty głowy'],precautions:['P271 - Stosować w dobrze wentylowanym miejscu','P312 - W przypadku złego samopoczucia skontaktować się z lekarzem','P405 - Przechowywać pod zamknięciem','P501 - Usuwać zgodnie z przepisami']}
+  },
+  CF:{
+    uk:{contains:'1-етоксипропан-2-ол',hazards:['H336 - Може викликати сонливість або запаморочення'],precautions:['P261 - Уникати вдихання парів','P271 - Використовувати у вентильованому приміщенні','P405 - Зберігати під замком','P501 - Утилізувати відповідно до правил']},
+    en:{contains:'1-ethoxypropan-2-ol',hazards:['H336 - May cause drowsiness or dizziness'],precautions:['P261 - Avoid breathing vapours','P271 - Use in well-ventilated area','P405 - Store locked up','P501 - Dispose in accordance with regulations']},
+    pl:{contains:'1-etoksypropan-2-ol',hazards:['H336 - Może wywoływać senność lub zawroty głowy'],precautions:['P261 - Unikać wdychania par','P271 - Stosować w wentylowanym miejscu','P405 - Przechowywać pod zamknięciem','P501 - Usuwać zgodnie z przepisami']}
+  },
+  PLUV:{
+    uk:{contains:'Ацетат 2-етокси-1-метилетилу та вуглеводні C9, ароматичні',hazards:['H226 - Легкозаймиста рідина і пари','H304 - Може бути смертельним при ковтанні','H336 - Може викликати сонливість або запаморочення','H412 - Шкідливо для водних організмів'],precautions:['P210 - Тримати подалі від джерел тепла та вогню','P280 - Використовувати засоби захисту','P301+P310 - ПРИ ПРОКОВТУВАННІ: негайно звернутися до лікаря','P403+P233 - Зберігати у добре вентильованому місці']},
+    en:{contains:'2-ethoxy-1-methylethyl acetate and C9 aromatic hydrocarbons',hazards:['H226 - Flammable liquid and vapour','H304 - May be fatal if swallowed and enters airways','H336 - May cause drowsiness or dizziness','H412 - Harmful to aquatic life with long lasting effects'],precautions:['P210 - Keep away from heat, sparks, open flames','P280 - Wear protective equipment','P301+P310 - IF SWALLOWED: Immediately call a doctor','P403+P233 - Store in a well-ventilated place']},
+    pl:{contains:'Octan 2-etoksy-1-metyloetylu i węglowodory C9, aromatyczne',hazards:['H226 - Łatwopalna ciecz i pary','H304 - Połknięcie i dostanie się przez drogi oddechowe może grozić śmiercią','H336 - Może wywoływać senność lub zawroty głowy','H412 - Działa szkodliwie na organizmy wodne, powodując długotrwałe skutki'],precautions:['P210 - Z dala od ciepła, iskier i otwartego ognia','P280 - Stosować środki ochrony osobistej','P301+P310 - W PRZYPADKU POŁKNIĘCIA: natychmiast skontaktować się z lekarzem','P403+P233 - Przechowywać w dobrze wentylowanym miejscu']}
+  },
+  PLUV_LED:{
+    uk:{contains:'Ацетат 2-етокси-1-метилетилу та вуглеводні C9, ароматичні',hazards:['H226 - Легкозаймиста рідина і пари','H304 - Може бути смертельним при ковтанні','H336 - Може викликати сонливість або запаморочення','H412 - Шкідливо для водних організмів'],precautions:['P210 - Тримати подалі від джерел тепла та вогню','P280 - Використовувати засоби захисту','P301+P310 - ПРИ ПРОКОВТУВАННІ: негайно звернутися до лікаря','P403+P233 - Зберігати у добре вентильованому місці']},
+    en:{contains:'2-ethoxy-1-methylethyl acetate and C9 aromatic hydrocarbons',hazards:['H226 - Flammable liquid and vapour','H304 - May be fatal if swallowed and enters airways','H336 - May cause drowsiness or dizziness','H412 - Harmful to aquatic life with long lasting effects'],precautions:['P210 - Keep away from heat, sparks, open flames','P280 - Wear protective equipment','P301+P310 - IF SWALLOWED: Immediately call a doctor','P403+P233 - Store in a well-ventilated place']},
+    pl:{contains:'Octan 2-etoksy-1-metyloetylu i węglowodory C9, aromatyczne',hazards:['H226 - Łatwopalna ciecz i pary','H304 - Połknięcie i dostanie się przez drogi oddechowe może grozić śmiercią','H336 - Może wywoływać senność lub zawroty głowy','H412 - Działa szkodliwie na organizmy wodne, powodując długotrwałe skutki'],precautions:['P210 - Z dala od ciepła, iskier i otwartego ognia','P280 - Stosować środki ochrony osobistej','P301+P310 - W PRZYPADKU POŁKNIĘCIA: natychmiast skontaktować się z lekarzem','P403+P233 - Przechowywać w dobrze wentylowanym miejscu']}
+  },
+  TPP:{
+    uk:{contains:'Ацетат 2-етокси-1-метилетилу та вуглеводні C9',hazards:['H226 - Легкозаймиста рідина і пари','H304 - Може бути смертельним при ковтанні','H336 - Може викликати сонливість або запаморочення','H412 - Шкідливо для водних організмів'],precautions:['P210 - Тримати подалі від тепла та вогню','P280 - Використовувати засоби захисту','P301+P310 - ПРИ ПРОКОВТУВАННІ: негайно звернутися до лікаря','P403+P233 - Зберігати у вентильованому місці']},
+    en:{contains:'2-ethoxy-1-methylethyl acetate and C9 hydrocarbons',hazards:['H226 - Flammable liquid and vapour','H304 - May be fatal if swallowed','H336 - May cause drowsiness or dizziness','H412 - Harmful to aquatic life with long lasting effects'],precautions:['P210 - Keep away from heat and open flames','P280 - Wear protective equipment','P301+P310 - IF SWALLOWED: call a doctor immediately','P403+P233 - Store in ventilated place']},
+    pl:{contains:'Octan 2-etoksy-1-metyloetylu i węglowodory C9',hazards:['H226 - Łatwopalna ciecz i pary','H304 - Połknięcie może grozić śmiercią','H336 - Może wywoływać senność lub zawroty głowy','H412 - Działa szkodliwie na organizmy wodne'],precautions:['P210 - Z dala od ciepła i ognia','P280 - Stosować środki ochrony','P301+P310 - W PRZYPADKU POŁKNIĘCIA: wezwać lekarza','P403+P233 - Przechowywać w wentylowanym miejscu']}
+  },
+  NST:{
+    uk:{contains:'Нітроцелюлоза',hazards:['H228 - Легкозаймисте тверде тіло'],precautions:['P210 - Тримати подалі від тепла та вогню','P240 - Заземлити контейнер','P370+P378 - У разі пожежі: використовувати відповідні засоби гасіння','P405 - Зберігати під замком']},
+    en:{contains:'Nitrocellulose',hazards:['H228 - Flammable solid'],precautions:['P210 - Keep away from heat and open flames','P240 - Ground container','P370+P378 - In case of fire: use appropriate extinguishing media','P405 - Store locked up']},
+    pl:{contains:'Nitroceluloza',hazards:['H228 - Łatwopalna substancja stała'],precautions:['P210 - Z dala od ciepła i ognia','P240 - Uziemić pojemnik','P370+P378 - W przypadku pożaru: używać odpowiednich środków gaśniczych','P405 - Przechowywać pod zamknięciem']}
+  },
+  QS:{
+    uk:{contains:'Нітроцелюлоза',hazards:['H228 - Легкозаймисте тверде тіло'],precautions:['P210 - Тримати подалі від тепла та вогню','P240 - Заземлити контейнер','P370+P378 - У разі пожежі: використовувати відповідні засоби гасіння']},
+    en:{contains:'Nitrocellulose',hazards:['H228 - Flammable solid'],precautions:['P210 - Keep away from heat and open flames','P240 - Ground container','P370+P378 - In case of fire: use appropriate extinguishing media']},
+    pl:{contains:'Nitroceluloza',hazards:['H228 - Łatwopalna substancja stała'],precautions:['P210 - Z dala od ciepła i ognia','P240 - Uziemić pojemnik','P370+P378 - W przypadku pożaru: używać odpowiednich środków gaśniczych']}
+  },
+  SN:{
+    uk:{contains:'Нітроцелюлоза',hazards:['H228 - Легкозаймисте тверде тіло'],precautions:['P210 - Тримати подалі від тепла та вогню','P370+P378 - У разі пожежі: використовувати відповідні засоби гасіння','P405 - Зберігати під замком']},
+    en:{contains:'Nitrocellulose',hazards:['H228 - Flammable solid'],precautions:['P210 - Keep away from heat and open flames','P370+P378 - In case of fire: use appropriate media','P405 - Store locked up']},
+    pl:{contains:'Nitroceluloza',hazards:['H228 - Łatwopalna substancja stała'],precautions:['P210 - Z dala od ciepła i ognia','P370+P378 - W przypadku pożaru: używać odpowiednich środków gaśniczych','P405 - Przechowywać pod zamknięciem']}
+  },
+  SX:  {uk:{nonHazardous:true},en:{nonHazardous:true},pl:{nonHazardous:true}},
+  SPTN:{uk:{nonHazardous:true},en:{nonHazardous:true},pl:{nonHazardous:true}},
+  AS:  {uk:{nonHazardous:true},en:{nonHazardous:true},pl:{nonHazardous:true}},
+  OTF: {uk:{nonHazardous:true},en:{nonHazardous:true},pl:{nonHazardous:true}},
+};
+
+const GHS_EMOJI = {GHS02:'🔥',GHS07:'⚠️',GHS08:'🫁',GHS09:'🐟',GHS01:'💣',GHS05:'☠',GHS06:'💀'};const SERIES = {
   EC: { name: 'EURECO EC', bg: '#10b981', border: '#fbbf24', ghs: ['GHS02', 'GHS07'] },
   CF: { name: 'CARTOFLEX CF', bg: '#dc2626', border: '#fcd34d', ghs: ['GHS07'] },
   PLUV: { name: 'UVIPLAST PLUV', bg: '#2563eb', border: '#fbbf24', ghs: ['GHS07', 'GHS08', 'GHS09'] },
