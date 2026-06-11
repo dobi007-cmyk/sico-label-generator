@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SICO Label Generator | Multi‑Language & Advanced Layout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-badge">SICO</span>
+    <span class="logo-text" data-i18n="app_title">Label Generator</span>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="uk">УКР</button>
+    <button class="lang-btn" data-lang="en">ENG</button>
+    <button class="lang-btn" data-lang="pl">PL</button>
+  </div>
+</header>
+
+<main>
+  <aside class="panel">
+    <!-- Series -->
+    <div>
+      <div class="section-label" data-i18n="section_series">Серія фарби</div>
+      <div class="series-grid" id="seriesGrid"></div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Product Info -->
+    <div>
+      <div class="section-label" data-i18n="section_product">Інформація про продукт</div>
+      <div class="field-group">
+        <div class="field"><label data-i18n="field_name">Назва кольору</label><input type="text" id="productName" data-i18n-placeholder="field_name_ph"></div>
+        <div class="field"><label data-i18n="field_category">Категорія</label><input type="text" id="productCategory"></div>
+        <div class="field"><label data-i18n="field_use">Застосування</label><input type="text" id="productUse"></div>
+        <div class="field"><label data-i18n="field_aspect">Вигляд / Блиск</label><input type="text" id="productAspect"></div>
+        <div class="field"><label data-i18n="field_drying">Сушіння</label><input type="text" id="productDrying"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Weight & Size -->
+    <div>
+      <div class="section-label" data-i18n="section_weight">Вага та розмір</div>
+      <div class="field-group">
+        <div class="field"><label data-i18n="field_weight">Вага (кг)</label><div class="weight-row"><input type="number" id="weightKg" value="1.00" step="0.01"><div class="weight-unit">kg</div></div></div>
+        <div class="field"><label data-i18n="field_size">Розмір однієї етикетки</label><div class="size-radios"><button class="size-radio-btn" data-size="A6" id="sizeA6" data-i18n="size_a6">A6 148×105</button><button class="size-radio-btn" data-size="A5" id="sizeA5" data-i18n="size_a5">A5 210×148</button><button class="size-radio-btn" data-size="custom" id="sizeCustom" data-i18n="size_custom">Своє</button></div></div>
+        <div class="field" id="customSizeField" style="display:none"><label data-i18n="field_custom_size">Ш × В (мм)</label><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;"><input type="number" id="customW" value="148" min="50"><span>×</span><input type="number" id="customH" value="105" min="50"></div></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Advanced Layout -->
+    <div>
+      <div class="section-label" data-i18n="section_layout">Розміщення на аркуші</div>
+      <div style="margin-bottom:10px;"><div class="layout-label" data-i18n="layout_copies">Кількість копій:</div>
+      <div class="layout-grid" id="layoutGrid">
+        <div class="layout-card" data-layout="1full"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr;"><div class="cell"></div></div><div class="layout-name" data-i18n="layout_1full">1 — повний</div></div>
+        <div class="layout-card" data-layout="2horiz"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2horiz">2 — поряд</div></div>
+        <div class="layout-card" data-layout="2vert"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr 1fr;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2vert">2 — зверху/знизу</div></div>
+        <div class="layout-card" data-layout="4grid"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_4grid">4 — сітка</div></div>
+        <div class="layout-card" data-layout="custom"><div class="layout-icon" id="customIconPreview" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"><div class="cell active" data-pos="tl"></div><div class="cell empty" data-pos="tr"></div><div class="cell empty" data-pos="bl"></div><div class="cell empty" data-pos="br"></div></div><div class="layout-name" data-i18n="layout_custom">Свої позиції</div></div>
+      </div></div>
+      <div id="posPickerWrap" style="display:none"><div class="pos-label" data-i18n="pos_pick">Оберіть позиції:</div><div class="pos-grid"><button class="pos-btn" data-pos="tl" data-i18n="pos_tl">↖ Верх-Ліво</button><button class="pos-btn" data-pos="tr" data-i18n="pos_tr">↗ Верх-Право</button><button class="pos-btn" data-pos="bl" data-i18n="pos_bl">↙ Низ-Ліво</button><button class="pos-btn" data-pos="br" data-i18n="pos_br">↘ Низ-Право</button></div></div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Options -->
+    <div>
+      <div class="section-label" data-i18n="section_options">Опції</div>
+      <div class="field-group">
+        <div class="toggle-row"><span class="toggle-label" data-i18n="opt_safety">Блок безпеки GHS</span><label class="toggle"><input type="checkbox" id="showSafety" checked><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label" data-i18n="opt_distributor">Дистриб'ютор / Виробник</span><label class="toggle"><input type="checkbox" id="showDistributor" checked><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label" data-i18n="opt_note">Примітка (проф. використання)</span><label class="toggle"><input type="checkbox" id="showNote" checked><div class="toggle-slider"></div></label></div>
+        <div class="field"><label data-i18n="field_distributor">Дистриб'ютор</label><input type="text" id="distributorName" value="SICO Polska Sp. z o.o."></div>
+        <div class="field"><label data-i18n="field_producer">Виробник</label><input type="text" id="producerName" value="CHIMIGRAF IBERICA S.L. — Spain"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Batch -->
+    <div>
+      <div class="section-label" data-i18n="section_batch">Партія (опційно)</div>
+      <div class="field-group"><div class="field"><label data-i18n="field_batch">Номер партії</label><input type="text" id="batchNo"></div><div class="field"><label data-i18n="field_expiry">Термін придатності</label><input type="date" id="expiryDate"></div></div>
+    </div>
+    <div class="divider"></div>
+
+    <div class="action-row"><button class="btn-primary" id="printBtn" data-i18n="btn_print">🖨 Друкувати</button><button class="btn-secondary" id="copyBtn" data-i18n="btn_copy">📋 HTML</button></div>
+    <div class="action-row"><button class="btn-secondary" id="resetBtn" data-i18n="btn_reset">↺ Скинути</button></div>
+  </aside>
+
+  <div class="preview-area">
+    <div class="preview-toolbar"><span class="preview-title" data-i18n="preview_title">Попередній перегляд</span><div class="zoom-controls"><button class="zoom-btn" id="zoomOut">−</button><span class="zoom-val" id="zoomVal">70%</span><button class="zoom-btn" id="zoomIn">+</button><button class="zoom-btn" id="zoomReset">⌂</button></div></div>
+    <div class="preview-canvas" id="previewCanvas"><div class="label-wrap" id="labelWrap"><div id="labelPreview"></div></div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="translations.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
