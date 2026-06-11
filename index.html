@@ -49,7 +49,7 @@
       <div class="field-group">
         <div class="field"><label data-i18n="field_weight">Вага (кг)</label><div class="weight-row"><input type="number" id="weightKg" value="1.00" min="0.01" step="0.01" oninput="renderPreview()"><div class="weight-unit">kg</div></div></div>
         <div class="field"><label data-i18n="field_size">Розмір однієї етикетки</label><div class="size-radios"><button class="size-radio-btn active" onclick="setSize('A6')" id="sizeA6">A6 148×105</button><button class="size-radio-btn" onclick="setSize('A5')" id="sizeA5">A5 210×148</button><button class="size-radio-btn" onclick="setSize('custom')" id="sizeCustom" data-i18n="size_custom">Своє</button></div></div>
-        <div class="field" id="customSizeField" style="display:none"><label data-i18n="field_custom_size">Ш × В (мм)</label><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;"><input type="number" id="customW" value="148" min="50" oninput="renderPreview()"><span style="color:var(--muted);font-size:13px">×</span><input type="number" id="customH" value="105" min="50" oninput="renderPreview()"></div></div>
+        <div class="field" id="customSizeField" style="display:none"><label data-i18n="field_custom_size">Ш × В (мм)</label><div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;"><input type="number" id="customW" value="148" min="50" oninput="renderPreview()"><span>×</span><input type="number" id="customH" value="105" min="50" oninput="renderPreview()"></div></div>
       </div>
     </div>
     <div class="divider"></div>
@@ -59,12 +59,11 @@
       <div class="section-label" data-i18n="section_layout">Розміщення на аркуші</div>
       <div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;" data-i18n="layout_copies">Кількість копій:</div>
       <div class="layout-grid" id="layoutGrid">
-        <div class="layout-card active" onclick="setLayout('1full')" id="ly_1full"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr;"><div class="cell" style="width:36px;height:28px;border-radius:2px;"></div></div><div class="layout-name" data-i18n="layout_1full">1 — повний</div></div>
-        <div class="layout-card" onclick="setLayout('2horiz')" id="ly_2horiz"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr;width:36px;height:28px;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2horiz">2 — поряд</div></div>
-        <div class="layout-card" onclick="setLayout('2vert')" id="ly_2vert"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr 1fr;width:28px;height:28px;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2vert">2 — зверху/знизу</div></div>
-        <div class="layout-card" onclick="setLayout('4grid')" id="ly_4grid"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:36px;height:28px;"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_4grid">4 — сітка</div></div>
-        <div class="layout-card" onclick="setLayout('custom')" id="ly_custom"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:36px;height:28px;"><div class="cell active" id="li_tl" style="background:var(--accent)"></div><div class="cell empty" id="li_tr"></div><div class="cell empty" id="li_bl"></div><div class="cell empty" id="li_br"></div></div><div class="layout-name" data-i18n="layout_custom">Свої позиції</div></div>
-        <div style=""></div>
+        <div class="layout-card active" onclick="setLayout('1full')" id="ly_1full"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr;"><div class="cell"></div></div><div class="layout-name" data-i18n="layout_1full">1 — повний</div></div>
+        <div class="layout-card" onclick="setLayout('2horiz')" id="ly_2horiz"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2horiz">2 — поряд</div></div>
+        <div class="layout-card" onclick="setLayout('2vert')" id="ly_2vert"><div class="layout-icon" style="grid-template-columns:1fr;grid-template-rows:1fr 1fr;"><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_2vert">2 — стос</div></div>
+        <div class="layout-card" onclick="setLayout('4grid')" id="ly_4grid"><div class="layout-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div><div class="layout-name" data-i18n="layout_4grid">4 — сітка</div></div>
+        <div class="layout-card" onclick="setLayout('custom')" id="ly_custom"><div class="layout-icon" id="customIconPreview" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"><div class="cell active" id="li_tl"></div><div class="cell empty" id="li_tr"></div><div class="cell empty" id="li_bl"></div><div class="cell empty" id="li_br"></div></div><div class="layout-name" data-i18n="layout_custom">Свої позиції</div></div>
       </div></div>
       <div id="posPickerWrap" style="display:none"><div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;" data-i18n="pos_pick">Оберіть позиції:</div><div class="pos-grid"><button class="pos-btn active" id="pos_tl" onclick="togglePos('tl')" data-i18n="pos_tl">↖ Верх-Ліво</button><button class="pos-btn" id="pos_tr" onclick="togglePos('tr')" data-i18n="pos_tr">↗ Верх-Право</button><button class="pos-btn" id="pos_bl" onclick="togglePos('bl')" data-i18n="pos_bl">↙ Низ-Ліво</button><button class="pos-btn" id="pos_br" onclick="togglePos('br')" data-i18n="pos_br">↘ Низ-Право</button></div></div>
     </div>
@@ -95,7 +94,7 @@
   </aside>
 
   <div class="preview-area">
-    <div class="preview-toolbar"><span class="preview-title" data-i18n="preview_title">Попередній перегляд</span><div class="zoom-controls"><button class="zoom-btn" onclick="zoom(-10)">−</button><span class="zoom-val" id="zoomVal">70%</span><button class="zoom-btn" onclick="zoom(+10)">+</button><button class="zoom-btn" onclick="zoomReset()" title="Reset">⌂</button></div></div>
+    <div class="preview-toolbar"><span class="preview-title" data-i18n="preview_title">Попередній перегляд</span><div class="zoom-controls"><button class="zoom-btn" onclick="zoom(-10)">−</button><span class="zoom-val" id="zoomVal">70%</span><button class="zoom-btn" onclick="zoom(+10)">+</button><button class="zoom-btn" onclick="zoomReset()">⌂</button></div></div>
     <div class="preview-canvas" id="previewCanvas"><div class="label-wrap" id="labelWrap"><div id="labelPreview"></div></div></div>
   </div>
 </main>
